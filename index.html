@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>買い物リスト</title>
+</head>
+
+<body>
+
+    <h1>買い物リスト</h1>
+
+    <input
+        id="itemInput"
+        type="text">
+
+    <button
+        id="addButton">
+        追加
+    </button>
+
+    <ul id="itemList">
+    </ul>
+
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    updateDoc,
+    doc,
+    onSnapshot
+  }
+  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+    
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnFNhzmxh25TRmKHukP4UaUhH9svjDM6E",
+    authDomain: "shopping-list-784cb.firebaseapp.com",
+    projectId: "shopping-list-784cb",
+    storageBucket: "shopping-list-784cb.firebasestorage.app",
+    messagingSenderId: "319798455031",
+    appId: "1:319798455031:web:fdfb957a3a2b3ac23601f2",
+    measurementId: "G-E3HT781ELC"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db =   getFirestore(app);
+
+  console.log("Firestore connected");
+  console.log("Firebase is connected");
+    
+    function startRealtimeListener() {
+
+    onSnapshot(
+        collection(db, "shoppingItems"),
+
+        function(snapshot) {
+
+                console.log("onSnapshot発火");
+
+
+            const items = [];
+
+            snapshot.forEach((doc) => {
+
+                items.push({
+                    id: doc.id,
+                    text: doc.data().text,
+                    checked: doc.data().checked
+                });
+
+            });
+
+    console.log(items);
+
+    console.log(window.setItems);
+
+            window.setItems(items);
+
+        }
+    );
+
+}
+window.startRealtimeListener = startRealtimeListener;
+    
+async function updateItemChecked(id, checked) {
+
+    await updateDoc(
+        doc(db, "shoppingItems", id),
+        {
+            checked: checked
+        }
+    );
+
+}    
+    
+    window.updateItemChecked = updateItemChecked;
+    
+async function deleteItemFromFirestore(id) {
+
+    await deleteDoc(
+        doc(db, "shoppingItems", id)
+    );
+
+}
+    window.deleteItemFromFirestore = deleteItemFromFirestore;
+    
+  async function testFirestore() {
+
+    try {
+
+        await addDoc(
+            collection(db, "test"),
+            {
+                message: "hello"
+            }
+        );
+
+        console.log("Firestore write OK");
+
+    } catch (e) {
+
+        console.error(e);
+
+    }
+
+  }
+
+testFirestore();
+
+async function addItemToFirestore(text){
+    await addDoc(
+    collection(db,"shoppingItems"),
+    {
+        text: text,
+        checked: false
+    }
+    );
+}
+ window.addItemToFirestore =  addItemToFirestore;  
+
+async function loadItemsFromFirestore() {
+
+    const snapshot =
+        await getDocs(
+            collection(db, "shoppingItems")
+        );
+
+    const items = [];
+
+    snapshot.forEach((doc) => {
+
+        items.push({
+            id: doc.id,
+            text: doc.data().text,
+            checked: doc.data().checked
+        });
+
+    });
+
+    return items;
+
+}
+    
+//window.loadItemsFromFirestore = loadItemsFromFirestore;
+//window.loadItemsFromFirestore()
+//    .then(function(data) {
+
+//        console.log("Firestoreデータ");
+//        console.log(data);
+        //data.forEach(function(item) {
+        //  console.log(item.text);
+        //})
+//        window.setItems(data);
+    window.startRealtimeListener();
+//    });
+    
+    
+    </script>
+    
+    
+    <script src="app.js"></script>
+
+</body>
+
+</html>
