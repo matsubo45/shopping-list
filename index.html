@@ -29,9 +29,9 @@
     <!-- ===== ログイン後のみ表示するメインコンテンツ ===== -->
     <main class="app-main" id="appMain" style="display: none;">
 
-        <!-- ===== カテゴリ管理エリア ===== -->
-        <section class="card" id="categoryManageSection">
-            <h2 class="card-title">カテゴリ管理</h2>
+        <!-- ===== カテゴリ管理エリア（普段はあまり使わないので折りたたみ式にする） ===== -->
+        <details class="card" id="categoryManageSection">
+            <summary class="card-title collapsible-title">カテゴリ管理</summary>
 
             <ul id="categoryManageList" class="category-manage-list">
                 <!-- カテゴリの一覧（削除ボタン付き）はJSで生成 -->
@@ -44,7 +44,7 @@
                     placeholder="新しいカテゴリ名">
                 <button id="addCategoryButton" class="btn btn-secondary">カテゴリ追加</button>
             </div>
-        </section>
+        </details>
 
         <!-- ===== アイテム追加エリア ===== -->
         <section class="card" id="addItemSection">

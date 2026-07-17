@@ -91,6 +91,38 @@ body {
     letter-spacing: 0.02em;
 }
 
+/* ---------- 折りたたみ式のカード（カテゴリ管理など） ---------- */
+
+/* summary本来の▶マーカーを消して、自前の矢印アイコンに差し替える */
+.collapsible-title {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.collapsible-title::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-title::before {
+    content: "▶";
+    font-size: 0.7em;
+    color: var(--color-primary);
+    transition: transform 0.15s ease;
+}
+
+/* 開いている時は矢印を90度回転させて下向きにする */
+details[open] > .collapsible-title::before {
+    transform: rotate(90deg);
+}
+
+/* 閉じている時は見出し以外の余白を詰める */
+details:not([open]) > .card-title {
+    margin-bottom: 0;
+}
+
 /* ---------- 入力まわり ---------- */
 
 .input-row {
