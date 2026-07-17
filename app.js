@@ -1,164 +1,230 @@
-let items = [];
+// ==============================
+// 買い物リスト本体のロジック
+// アイテム／カテゴリの表示、追加、削除を担当する
+// Firestoreとのやり取り（addItemToFirestoreなど）はindex.html内で定義され、
+// window経由でこのファイルから呼び出している
+// ==============================
 
-const addButton =
-    document.getElementById("addButton");
+let items = [];      // 買い物アイテムの一覧（Firestoreの内容をそのまま保持）
+let categories = [];  // カテゴリの一覧（Firestoreの内容をそのまま保持）
 
-const input =
-    document.getElementById("itemInput");
+// ---------- DOM要素の取得 ----------
+const addButton = document.getElementById("addButton");
+const input = document.getElementById("itemInput");
+const categorySelect = document.getElementById("categorySelect");
+const itemListContainer = document.getElementById("itemListContainer");
 
-const list =
-    document.getElementById("itemList");
+const categoryManageList = document.getElementById("categoryManageList");
+const newCategoryInput = document.getElementById("newCategoryInput");
+const addCategoryButton = document.getElementById("addCategoryButton");
 
-const categorySelect =
-    document.getElementById(
-        "categorySelect"
-    );
+// ==============================
+// カテゴリまわり
+// ==============================
 
-function saveItems() {
+// カテゴリ管理エリア（一覧＋削除ボタン）と、追加フォームの選択肢を描画する
+function renderCategories() {
 
-    localStorage.setItem(
-        "shoppingItems",
-        JSON.stringify(items)
-    );
+    // --- カテゴリ選択肢（プルダウン）の描画 ---
+    // 選択中の値をなるべく保持するため、一度現在値を控えておく
+    const currentSelected = categorySelect.value;
 
-}
-function loadItems() {
+    categorySelect.innerHTML = "";
 
-    const saved =
-        localStorage.getItem(
-            "shoppingItems"
-        );
-
-    if (saved) {
-        items =
-            JSON.parse(saved);
-    }
-}
-
-function renderItems() {
-
-    list.innerHTML = "";
-
-
-const groups = {};
-
-for (const item of items) {
-
-    if (!groups[item.category]) {
-
-        groups[item.category] = [];
-
+    for (const category of categories) {
+        const option = document.createElement("option");
+        option.value = category.name;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
     }
 
-    groups[item.category].push(item);
+    // 直前まで選ばれていたカテゴリがまだ存在するなら、それを再度選択状態にする
+    if (categories.some((c) => c.name === currentSelected)) {
+        categorySelect.value = currentSelected;
+    }
 
-}
-    
-    for (const [index, item] of items.entries()) {
-    
+    // --- カテゴリ管理リスト（削除ボタン付き）の描画 ---
+    categoryManageList.innerHTML = "";
+
+    for (const category of categories) {
+
         const li = document.createElement("li");
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = item.checked;
+        li.className = "category-manage-item";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = category.name;
+
         const deleteButton = document.createElement("button");
         deleteButton.textContent = "削除";
-        deleteButton.addEventListener(
-           "click",
-           async function() {
+        deleteButton.className = "btn btn-delete btn-small";
+        deleteButton.addEventListener("click", async function () {
+            const confirmed = confirm(
+                `カテゴリ「${category.name}」を削除しますか？\n（このカテゴリの商品は残りますが、選択肢からは消えます）`
+            );
+            if (!confirmed) return;
 
-             await window.deleteItemFromFirestore(
-               item.id
-             );
+            await window.deleteCategoryFromFirestore(category.id);
+        });
 
-        items.splice(index, 1);
-
-        saveItems();
-
-        renderItems();
-
-    }
-);
-
-checkbox.addEventListener(
-    "change",
-    async function () {
-
-        item.checked =
-            checkbox.checked;
-
-        await window.updateItemChecked(
-            item.id,
-            checkbox.checked
-        );
-
-        saveItems();
-
-    }
-);
-if (item.checked) {
-    li.style.color = "gray";
-}        
-        li.appendChild(checkbox);
-        li.appendChild(document.createTextNode(" " + item.text + " "));
+        li.appendChild(nameSpan);
         li.appendChild(deleteButton);
-        list.appendChild(li);
-
+        categoryManageList.appendChild(li);
     }
-
 }
 
-// 起動時
-loadItems();
-renderItems();
+// 「カテゴリ追加」ボタンが押された時の処理
+async function addCategory() {
 
+    const name = newCategoryInput.value.trim();
+
+    if (name === "") {
+        return;
+    }
+
+    // 同じ名前のカテゴリがすでにある場合は追加しない
+    if (categories.some((c) => c.name === name)) {
+        alert("同じ名前のカテゴリが既にあります");
+        return;
+    }
+
+    await window.addCategoryToFirestore(name);
+
+    newCategoryInput.value = "";
+    newCategoryInput.focus();
+}
+
+addCategoryButton.addEventListener("click", addCategory);
+
+newCategoryInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        addCategory();
+    }
+});
+
+// index.html側のonSnapshotから呼ばれる（カテゴリ一覧が更新される度に実行）
+window.setCategories = function (data) {
+    categories = data;
+    renderCategories();
+};
+
+// ==============================
+// アイテム（商品）まわり
+// ==============================
+
+// アイテムをカテゴリごとにグループ分けして表示する
+function renderItems() {
+
+    itemListContainer.innerHTML = "";
+
+    // カテゴリごとにアイテムをまとめる
+    const groups = {};
+
+    for (const item of items) {
+        const categoryName = item.category || "未分類";
+        if (!groups[categoryName]) {
+            groups[categoryName] = [];
+        }
+        groups[categoryName].push(item);
+    }
+
+    // カテゴリの表示順は「カテゴリ管理」で登録されている順番を優先し、
+    // その後にカテゴリ一覧に無いもの（未分類など）を続ける
+    const orderedNames = categories.map((c) => c.name);
+    for (const name of Object.keys(groups)) {
+        if (!orderedNames.includes(name)) {
+            orderedNames.push(name);
+        }
+    }
+
+    for (const categoryName of orderedNames) {
+
+        const groupItems = groups[categoryName];
+        if (!groupItems || groupItems.length === 0) {
+            continue; // アイテムが無いカテゴリは表示しない
+        }
+
+        // カテゴリごとのセクションを作成
+        const section = document.createElement("section");
+        section.className = "category-group";
+
+        const heading = document.createElement("h2");
+        heading.className = "category-heading";
+        heading.textContent = categoryName;
+        section.appendChild(heading);
+
+        const ul = document.createElement("ul");
+        ul.className = "item-list";
+
+        for (const item of groupItems) {
+            ul.appendChild(createItemElement(item));
+        }
+
+        section.appendChild(ul);
+        itemListContainer.appendChild(section);
+    }
+}
+
+// 1件分のアイテム（チェックボックス＋テキスト＋削除ボタン）のDOM要素を作る
+function createItemElement(item) {
+
+    const li = document.createElement("li");
+    li.className = "item-row";
+    if (item.checked) {
+        li.classList.add("item-checked");
+    }
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = item.checked;
+    checkbox.addEventListener("change", async function () {
+        item.checked = checkbox.checked;
+        await window.updateItemChecked(item.id, checkbox.checked);
+        renderItems();
+    });
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "item-text";
+    textSpan.textContent = item.text;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "削除";
+    deleteButton.className = "btn btn-delete btn-small";
+    deleteButton.addEventListener("click", async function () {
+        await window.deleteItemFromFirestore(item.id);
+    });
+
+    li.appendChild(checkbox);
+    li.appendChild(textSpan);
+    li.appendChild(deleteButton);
+
+    return li;
+}
+
+// index.html側のonSnapshotから呼ばれる（アイテム一覧が更新される度に実行）
+window.setItems = function (data) {
+    items = data;
+    renderItems();
+};
+
+// 「追加」ボタンが押された時の処理
 async function addItem() {
 
     const text = input.value.trim();
 
-if (text === "") {
-    return;
-}
-    
+    if (text === "") {
+        return;
+    }
 
-//    items.push({
-//        text: text,
-//        checked: false
-//    });
-await window.addItemToFirestore(text,categorySelect.value);
-//    saveItems();
-
-//    renderItems();
+    await window.addItemToFirestore(text, categorySelect.value);
 
     input.value = "";
     input.focus();
 }
 
-addButton.addEventListener(
-    "click",
-    addItem
-);
+addButton.addEventListener("click", addItem);
 
-input.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (event.key === "Enter") {
-            addItem();
-        }
-
+input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        addItem();
     }
-);
-
-console.log("app.js開始");
-
-console.log(window.loadItemsFromFirestore);
-
-console.log(items);
-
-window.setItems = function(data) {
-
-    items = data;
-
-    renderItems();
-
-};
+});
