@@ -145,12 +145,13 @@ async function deleteItemFromFirestore(id) {
 
 testFirestore();
 
-async function addItemToFirestore(text){
+async function addItemToFirestore(text,category){
     await addDoc(
     collection(db,"shoppingItems"),
     {
         text: text,
-        checked: false
+        checked: false,
+        category: category
     }
     );
 }
@@ -170,7 +171,8 @@ async function loadItemsFromFirestore() {
         items.push({
             id: doc.id,
             text: doc.data().text,
-            checked: doc.data().checked
+            checked: doc.data().checked,
+            category: doc.data().category
         });
 
     });
