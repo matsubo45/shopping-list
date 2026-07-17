@@ -9,6 +9,11 @@ const input =
 const list =
     document.getElementById("itemList");
 
+const categorySelect =
+    document.getElementById(
+        "categorySelect"
+    );
+
 function saveItems() {
 
     localStorage.setItem(
