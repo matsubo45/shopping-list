@@ -110,7 +110,7 @@ if (text === "") {
 //        text: text,
 //        checked: false
 //    });
-await window.addItemToFirestore(text);
+await window.addItemToFirestore(text,categorySelect.value);
 //    saveItems();
 
 //    renderItems();
