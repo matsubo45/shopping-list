@@ -247,6 +247,23 @@ select:focus {
 .item-text {
     flex: 1;
     word-break: break-word;
+    cursor: pointer;
+}
+
+.item-text:hover {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
+.item-edit-input {
+    flex: 1;
+    min-width: 0;
+    padding: 4px 6px;
+    font-size: 1rem;
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 /* チェック済みアイテムはグレーアウト＋打ち消し線 */

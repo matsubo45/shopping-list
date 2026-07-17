@@ -197,6 +197,10 @@ function createItemElement(item) {
     const textSpan = document.createElement("span");
     textSpan.className = "item-text";
     textSpan.textContent = item.text;
+    textSpan.title = "タップして編集";
+    textSpan.addEventListener("click", function () {
+        startEditingItem(item, textSpan);
+    });
 
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "削除";
@@ -210,6 +214,49 @@ function createItemElement(item) {
     li.appendChild(deleteButton);
 
     return li;
+}
+
+// アイテムのテキスト部分を、その場で編集できる入力欄に切り替える
+function startEditingItem(item, textSpan) {
+
+    const editInput = document.createElement("input");
+    editInput.type = "text";
+    editInput.className = "item-edit-input";
+    editInput.value = item.text;
+
+    // テキストの表示部分を、入力欄に差し替える
+    textSpan.replaceWith(editInput);
+    editInput.focus();
+    editInput.select();
+
+    let finished = false; // Enterとblurが両方発火して二重保存されるのを防ぐフラグ
+
+    async function finishEditing(shouldSave) {
+
+        if (finished) return;
+        finished = true;
+
+        const newText = editInput.value.trim();
+
+        if (shouldSave && newText !== "" && newText !== item.text) {
+            item.text = newText;
+            await window.updateItemText(item.id, newText);
+        }
+
+        renderItems(); // 元のカテゴリ別リスト表示に戻す
+    }
+
+    editInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            finishEditing(true);
+        } else if (event.key === "Escape") {
+            finishEditing(false);
+        }
+    });
+
+    editInput.addEventListener("blur", function () {
+        finishEditing(true);
+    });
 }
 
 // index.html側のonSnapshotから呼ばれる（アイテム一覧が更新される度に実行）

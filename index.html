@@ -147,6 +147,13 @@
             });
         }
 
+        // アイテムのテキスト（商品名）を更新
+        async function updateItemText(id, text) {
+            await updateDoc(doc(db, "shoppingItems", id), {
+                text: text
+            });
+        }
+
         // アイテムを削除
         async function deleteItemFromFirestore(id) {
             await deleteDoc(doc(db, "shoppingItems", id));
@@ -210,6 +217,7 @@
         // app.js（グローバル）から呼び出せるようにする
         window.addItemToFirestore = addItemToFirestore;
         window.updateItemChecked = updateItemChecked;
+        window.updateItemText = updateItemText;
         window.deleteItemFromFirestore = deleteItemFromFirestore;
         window.addCategoryToFirestore = addCategoryToFirestore;
         window.deleteCategoryFromFirestore = deleteCategoryFromFirestore;
