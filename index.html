@@ -14,7 +14,20 @@
         <h1>🛒 買い物リスト</h1>
     </header>
 
-    <main class="app-main">
+    <!-- ===== ログイン前に表示する画面 ===== -->
+    <section class="card" id="loginSection">
+        <p>買い物リストを見るにはGoogleアカウントでログインしてください。</p>
+        <button id="loginButton" class="btn btn-primary">Googleでログイン</button>
+    </section>
+
+    <!-- ===== ログイン後に表示するユーザー情報バー ===== -->
+    <div id="userBar" class="user-bar" style="display: none;">
+        <span id="userName"></span>
+        <button id="logoutButton" class="btn btn-delete btn-small">ログアウト</button>
+    </div>
+
+    <!-- ===== ログイン後のみ表示するメインコンテンツ ===== -->
+    <main class="app-main" id="appMain" style="display: none;">
 
         <!-- ===== カテゴリ管理エリア ===== -->
         <section class="card" id="categoryManageSection">
@@ -71,6 +84,13 @@
             doc,
             onSnapshot
         } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        import {
+            getAuth,
+            GoogleAuthProvider,
+            signInWithPopup,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
         // Firebaseの設定（このプロジェクト用の設定情報）
         const firebaseConfig = {
@@ -87,6 +107,8 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
         // デフォルトで用意しておくカテゴリ（Firestoreに何も無い場合だけ使う）
         const DEFAULT_CATEGORIES = ["スーパー", "ドラッグストア", "100均"];
@@ -167,6 +189,24 @@
             await deleteDoc(doc(db, "categories", id));
         }
 
+        // ---------- ログイン・ログアウト関連 ----------
+
+        // Googleログインのポップアップを開く
+        function login() {
+            signInWithPopup(auth, provider).catch((error) => {
+                console.error("ログインエラー:", error);
+                alert("ログインに失敗しました。もう一度お試しください。");
+            });
+        }
+
+        // ログアウトする
+        function logout() {
+            signOut(auth);
+        }
+
+        window.login = login;
+        window.logout = logout;
+
         // app.js（グローバル）から呼び出せるようにする
         window.addItemToFirestore = addItemToFirestore;
         window.updateItemChecked = updateItemChecked;
@@ -174,9 +214,36 @@
         window.addCategoryToFirestore = addCategoryToFirestore;
         window.deleteCategoryFromFirestore = deleteCategoryFromFirestore;
 
-        // リアルタイム監視を開始
-        startItemsListener();
-        startCategoriesListener();
+        // 画面の要素（ログイン前/後で表示を切り替えるため）
+        const loginSection = document.getElementById("loginSection");
+        const userBar = document.getElementById("userBar");
+        const userName = document.getElementById("userName");
+        const appMain = document.getElementById("appMain");
+
+        let listenersStarted = false; // リアルタイム監視を1度だけ開始するためのフラグ
+
+        // ログイン状態の変化を監視する
+        // ログインしている時だけFirestoreの監視を開始し、画面を表示する
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // ログイン済み：メイン画面を表示
+                loginSection.style.display = "none";
+                userBar.style.display = "flex";
+                appMain.style.display = "block";
+                userName.textContent = user.displayName + "さん";
+
+                if (!listenersStarted) {
+                    listenersStarted = true;
+                    startItemsListener();
+                    startCategoriesListener();
+                }
+            } else {
+                // 未ログイン：ログイン画面のみ表示
+                loginSection.style.display = "block";
+                userBar.style.display = "none";
+                appMain.style.display = "none";
+            }
+        });
     </script>
 
     <script src="app.js"></script>

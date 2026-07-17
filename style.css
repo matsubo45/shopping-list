@@ -33,6 +33,32 @@ body {
     line-height: 1.6;
 }
 
+/* ---------- ログイン画面 ---------- */
+
+#loginSection {
+    text-align: center;
+}
+
+#loginSection p {
+    margin-top: 0;
+    color: var(--color-text-muted);
+}
+
+/* ---------- ユーザー情報バー ---------- */
+
+.user-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 8px 12px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
 /* ---------- ヘッダー ---------- */
 
 .app-header {

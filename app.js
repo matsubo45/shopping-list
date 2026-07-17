@@ -8,6 +8,18 @@
 let items = [];      // 買い物アイテムの一覧（Firestoreの内容をそのまま保持）
 let categories = [];  // カテゴリの一覧（Firestoreの内容をそのまま保持）
 
+// ---------- ログイン・ログアウトボタン ----------
+const loginButton = document.getElementById("loginButton");
+const logoutButton = document.getElementById("logoutButton");
+
+loginButton.addEventListener("click", function () {
+    window.login();
+});
+
+logoutButton.addEventListener("click", function () {
+    window.logout();
+});
+
 // ---------- DOM要素の取得 ----------
 const addButton = document.getElementById("addButton");
 const input = document.getElementById("itemInput");
