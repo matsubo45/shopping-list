@@ -240,6 +240,10 @@ select:focus {
     flex-shrink: 0;
 }
 
+.item-row .btn {
+    flex-shrink: 0; /* 商品名が長い時でも削除ボタンが潰れないようにする */
+}
+
 .item-text {
     flex: 1;
     word-break: break-word;
@@ -258,7 +262,18 @@ select:focus {
         flex-direction: column;
     }
 
-    .btn {
+    /* 「追加」「カテゴリ追加」のような大きいボタンだけ幅を100%にする。
+       商品削除・カテゴリ削除の小さいボタン（.btn-small）は対象外にする。
+       これを分けないと、削除ボタンが商品名の表示スペースを奪ってしまう */
+    .input-row .btn {
         width: 100%;
+    }
+
+    .item-row {
+        flex-wrap: nowrap;
+    }
+
+    .item-text {
+        min-width: 0; /* flexアイテムが縮みすぎて文字が1文字ずつ折り返されるのを防ぐ */
     }
 }
