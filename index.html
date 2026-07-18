@@ -6,6 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>買い物リスト</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- ===== PWA（ホーム画面に追加）用の設定 ===== -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2F6F4F">
+
+    <!-- Android（ホーム画面アイコン） -->
+    <link rel="icon" href="icon-192.png">
+
+    <!-- iOS Safari（ホーム画面アイコン・スタンドアロン表示） -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="買い物リスト">
 </head>
 
 <body>
@@ -82,7 +95,8 @@
             deleteDoc,
             updateDoc,
             doc,
-            onSnapshot
+            onSnapshot,
+            enableIndexedDbPersistence
         } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
         import {
             getAuth,
@@ -109,6 +123,12 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
+
+        // オフラインでも直前までのデータを表示できるようにする
+        // （通信が不安定な時や、ホーム画面から開いた直後に有効）
+        enableIndexedDbPersistence(db).catch((error) => {
+            console.warn("オフライン永続化を有効化できませんでした:", error.code);
+        });
 
         // デフォルトで用意しておくカテゴリ（Firestoreに何も無い場合だけ使う）
         const DEFAULT_CATEGORIES = ["スーパー", "ドラッグストア", "100均"];

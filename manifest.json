@@ -1,0 +1,24 @@
+{
+  "name": "買い物リスト",
+  "short_name": "買い物リスト",
+  "description": "夫婦で共有する買い物リストアプリ",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F6F1",
+  "theme_color": "#2F6F4F",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
