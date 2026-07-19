@@ -276,6 +276,22 @@ select:focus {
     flex-shrink: 0; /* 商品名が長い時でも削除ボタンが潰れないようにする */
 }
 
+/* 「すぐ買う」⭐ボタン */
+.star-button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    line-height: 1;
+    padding: 2px 4px;
+    cursor: pointer;
+    color: var(--color-border);
+}
+
+.star-button.star-active {
+    color: var(--color-accent);
+}
+
 .item-text {
     flex: 1;
     word-break: break-word;

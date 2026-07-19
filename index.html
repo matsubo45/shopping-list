@@ -144,7 +144,8 @@
                         id: docSnap.id,
                         text: docSnap.data().text,
                         checked: docSnap.data().checked,
-                        category: docSnap.data().category
+                        category: docSnap.data().category,
+                        starred: docSnap.data().starred || false
                     });
                 });
                 window.setItems(items);
@@ -171,6 +172,13 @@
         async function updateItemText(id, text) {
             await updateDoc(doc(db, "shoppingItems", id), {
                 text: text
+            });
+        }
+
+        // アイテムの「すぐ買う」スター状態を更新
+        async function updateItemStarred(id, starred) {
+            await updateDoc(doc(db, "shoppingItems", id), {
+                starred: starred
             });
         }
 
@@ -238,6 +246,7 @@
         window.addItemToFirestore = addItemToFirestore;
         window.updateItemChecked = updateItemChecked;
         window.updateItemText = updateItemText;
+        window.updateItemStarred = updateItemStarred;
         window.deleteItemFromFirestore = deleteItemFromFirestore;
         window.addCategoryToFirestore = addCategoryToFirestore;
         window.deleteCategoryFromFirestore = deleteCategoryFromFirestore;

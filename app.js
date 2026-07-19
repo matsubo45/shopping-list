@@ -167,7 +167,12 @@ function renderItems() {
         const ul = document.createElement("ul");
         ul.className = "item-list";
 
-        for (const item of groupItems) {
+        // ⭐が付いているアイテムを上に表示する（安定ソートなので、それ以外は元の順番を保つ）
+        const sortedItems = [...groupItems].sort(function (a, b) {
+            return (b.starred ? 1 : 0) - (a.starred ? 1 : 0);
+        });
+
+        for (const item of sortedItems) {
             ul.appendChild(createItemElement(item));
         }
 
@@ -194,6 +199,21 @@ function createItemElement(item) {
         renderItems();
     });
 
+    // 「すぐ買う」用の⭐ボタン。押すたびON/OFFが切り替わる
+    const starButton = document.createElement("button");
+    starButton.className = "star-button";
+    starButton.textContent = item.starred ? "★" : "☆";
+    starButton.title = "すぐ買うものに⭐を付ける";
+    if (item.starred) {
+        starButton.classList.add("star-active");
+    }
+    starButton.addEventListener("click", async function () {
+        const newStarred = !item.starred;
+        item.starred = newStarred;
+        await window.updateItemStarred(item.id, newStarred);
+        renderItems();
+    });
+
     const textSpan = document.createElement("span");
     textSpan.className = "item-text";
     textSpan.textContent = item.text;
@@ -210,6 +230,7 @@ function createItemElement(item) {
     });
 
     li.appendChild(checkbox);
+    li.appendChild(starButton);
     li.appendChild(textSpan);
     li.appendChild(deleteButton);
 
