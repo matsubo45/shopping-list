@@ -13,10 +13,19 @@ const loginButton = document.getElementById("loginButton");
 const logoutButton = document.getElementById("logoutButton");
 const loginEmail = document.getElementById("loginEmail");
 const loginPassword = document.getElementById("loginPassword");
+const togglePasswordButton = document.getElementById("togglePasswordButton");
+
+// パスワードの表示・非表示を切り替える（スマホでの入力ミス確認用）
+togglePasswordButton.addEventListener("click", function () {
+    const isHidden = loginPassword.type === "password";
+    loginPassword.type = isHidden ? "text" : "password";
+    togglePasswordButton.textContent = isHidden ? "隠す" : "表示";
+});
 
 function attemptLogin() {
+    // スマホのキーボード操作で紛れ込みやすい前後の空白を取り除く
     const email = loginEmail.value.trim();
-    const password = loginPassword.value;
+    const password = loginPassword.value.trim();
 
     if (email === "" || password === "") {
         alert("メールアドレスとパスワードを入力してください");

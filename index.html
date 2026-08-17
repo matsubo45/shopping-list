@@ -36,14 +36,21 @@
                 id="loginEmail"
                 type="email"
                 placeholder="メールアドレス"
-                autocomplete="username">
+                autocomplete="username"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false">
         </div>
         <div class="input-row login-input-row">
             <input
                 id="loginPassword"
                 type="password"
                 placeholder="パスワード"
-                autocomplete="current-password">
+                autocomplete="current-password"
+                autocapitalize="off"
+                autocorrect="off"
+                spellcheck="false">
+            <button type="button" id="togglePasswordButton" class="btn btn-secondary btn-small">表示</button>
         </div>
 
         <button id="loginButton" class="btn btn-primary">ログイン</button>

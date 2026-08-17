@@ -48,6 +48,10 @@ body {
     margin-bottom: 10px;
 }
 
+.login-input-row #loginPassword {
+    flex: 1;
+}
+
 #loginSection .btn-primary {
     width: 100%;
 }
