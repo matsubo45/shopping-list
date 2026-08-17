@@ -101,7 +101,8 @@
         import {
             getAuth,
             GoogleAuthProvider,
-            signInWithPopup,
+            signInWithRedirect,
+            getRedirectResult,
             signOut,
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
@@ -226,13 +227,16 @@
 
         // ---------- ログイン・ログアウト関連 ----------
 
-        // Googleログインのポップアップを開く
+        // Googleログイン画面へ遷移する（ポップアップより、PWA/モバイルで安定するリダイレクト方式を使用）
         function login() {
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("ログインエラー:", error);
-                alert("ログインに失敗しました。もう一度お試しください。");
-            });
+            signInWithRedirect(auth, provider);
         }
+
+        // ログイン画面から戻ってきた直後にエラーが無かったか確認する
+        getRedirectResult(auth).catch((error) => {
+            console.error("ログインエラー:", error);
+            alert("ログインに失敗しました。もう一度お試しください。");
+        });
 
         // ログアウトする
         function logout() {
