@@ -11,9 +11,28 @@ let categories = [];  // カテゴリの一覧（Firestoreの内容をそのま�
 // ---------- ログイン・ログアウトボタン ----------
 const loginButton = document.getElementById("loginButton");
 const logoutButton = document.getElementById("logoutButton");
+const loginEmail = document.getElementById("loginEmail");
+const loginPassword = document.getElementById("loginPassword");
 
-loginButton.addEventListener("click", function () {
-    window.login();
+function attemptLogin() {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
+
+    if (email === "" || password === "") {
+        alert("メールアドレスとパスワードを入力してください");
+        return;
+    }
+
+    window.login(email, password);
+}
+
+loginButton.addEventListener("click", attemptLogin);
+
+// パスワード欄でEnterを押してもログインできるようにする
+loginPassword.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        attemptLogin();
+    }
 });
 
 logoutButton.addEventListener("click", function () {

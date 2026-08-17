@@ -44,6 +44,14 @@ body {
     color: var(--color-text-muted);
 }
 
+.login-input-row {
+    margin-bottom: 10px;
+}
+
+#loginSection .btn-primary {
+    width: 100%;
+}
+
 /* ---------- ユーザー情報バー ---------- */
 
 .user-bar {

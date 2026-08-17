@@ -29,8 +29,24 @@
 
     <!-- ===== ログイン前に表示する画面 ===== -->
     <section class="card" id="loginSection">
-        <p>買い物リストを見るにはGoogleアカウントでログインしてください。</p>
-        <button id="loginButton" class="btn btn-primary">Googleでログイン</button>
+        <p>買い物リストを見るにはログインしてください。</p>
+
+        <div class="input-row login-input-row">
+            <input
+                id="loginEmail"
+                type="email"
+                placeholder="メールアドレス"
+                autocomplete="username">
+        </div>
+        <div class="input-row login-input-row">
+            <input
+                id="loginPassword"
+                type="password"
+                placeholder="パスワード"
+                autocomplete="current-password">
+        </div>
+
+        <button id="loginButton" class="btn btn-primary">ログイン</button>
     </section>
 
     <!-- ===== ログイン後に表示するユーザー情報バー ===== -->
@@ -100,9 +116,7 @@
         } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
         import {
             getAuth,
-            GoogleAuthProvider,
-            signInWithRedirect,
-            getRedirectResult,
+            signInWithEmailAndPassword,
             signOut,
             onAuthStateChanged
         } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
@@ -123,7 +137,6 @@
         const analytics = getAnalytics(app);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
 
         // オフラインでも直前までのデータを表示できるようにする
         // （通信が不安定な時や、ホーム画面から開いた直後に有効）
@@ -227,16 +240,13 @@
 
         // ---------- ログイン・ログアウト関連 ----------
 
-        // Googleログイン画面へ遷移する（ポップアップより、PWA/モバイルで安定するリダイレクト方式を使用）
-        function login() {
-            signInWithRedirect(auth, provider);
+        // メールアドレス・パスワードでログインする
+        function login(email, password) {
+            return signInWithEmailAndPassword(auth, email, password).catch((error) => {
+                console.error("ログインエラー:", error);
+                alert("ログインに失敗しました。メールアドレスとパスワードを確認してください。");
+            });
         }
-
-        // ログイン画面から戻ってきた直後にエラーが無かったか確認する
-        getRedirectResult(auth).catch((error) => {
-            console.error("ログインエラー:", error);
-            alert("ログインに失敗しました。もう一度お試しください。");
-        });
 
         // ログアウトする
         function logout() {
@@ -271,7 +281,7 @@
                 loginSection.style.display = "none";
                 userBar.style.display = "flex";
                 appMain.style.display = "block";
-                userName.textContent = user.displayName + "さん";
+                userName.textContent = user.email + "さん";
 
                 if (!listenersStarted) {
                     listenersStarted = true;
